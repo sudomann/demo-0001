@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-app-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: ml-app
+  template:
+    metadata:
+      labels:
+        app: ml-app
+    spec:
+      containers:
+      - name: ml-app
+        image: your_ml_app_image:latest
+        ports:
+        - containerPort: 8000
+        env: []
+        envFrom:
+        - secretRef:
+            name: postgres-credentials
+        - configMapRef:
+            name: app-config
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+          requests:
+            cpu: "0.5"
+            memory: "256Mi"
+        
+      - name: data-backup-sidecar
+        image: your_data_backup_image:latest
+        volumeMounts:
+        - name: ml-app-data
+          mountPath: /data
+          readOnly: true
+        - name: s3-credentials
+          mountPath: /path/to/s3/credentials
+          readOnly: true
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
+          requests:
+            cpu: "0.1"
+            memory: "128Mi"
+  volumes:
+  - name: ml-app-data
+    emptyDir: {}  # You can also use a PersistentVolumeClaim if you need data persistence across pod restarts
+  - name: s3-credentials
+    secret:
+      secretName: s3-access-key-secret
+      items:
+      - key: s3-access-key
+        path: s3-access-key

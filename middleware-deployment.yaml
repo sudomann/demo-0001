@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3-middleware-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: s3-middleware
+  template:
+    metadata:
+      labels:
+        app: s3-middleware
+    spec:
+      containers:
+      - name: s3-middleware
+        image: your_s3_middleware_image:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: s3-access-key-secret
+        - configMapRef:
+            name: app-config
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
+          requests:
+            cpu: "0.1"
+            memory: "128Mi"
+        volumeMounts:
+        - name: s3-credentials
+          mountPath: /path/to/s3/credentials
+          readOnly: true
+      volumes:
+      - name: s3-credentials
+        secret:
+          secretName: s3-access-key-secret
+          items:
+          - key: s3-access-key
+            path: s3-access-key

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  ml-app-config.yml: |
+    # Sample ML App Config
+    # Replace with your actual configuration
+    parameter1: value1
+    parameter2: value2
+  middleware-config.yml: |
+    # Sample Middleware Config
+    # Replace with your actual configuration
+    s3_bucket: your_s3_bucket_name
